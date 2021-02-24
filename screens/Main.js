@@ -42,9 +42,12 @@ const data2 = Object.keys(tabscreen).map((i) => ({
 
 const data_reverse = data2.reverse()
 
-const Tab = React.forwardRef(({item, onItemPress, selected}, ref) => {
+const Tab = React.forwardRef(({item, onItemPress, selected, scrollX, index}, ref) => {
   const config = useSelector((state) => state.config);
-
+  const selcolor = scrollX.interpolate({
+    inputRange: [(index-2)*width, (index-1)*width, (index)*width, (index+1)*width, (index+2)*width],
+    outputRange: [Theme.primary, Theme.primary, 'white', Theme.primary, Theme.primary],
+  })
   return (
     <TouchableOpacity onPress={onItemPress}>
       <View ref={ref} style={{flexDirection : config.language == 'en' ? 'row' : 'row-reverse', justifyContent: 'space-evenly', alignItems: "center"}}>
@@ -58,12 +61,12 @@ const Tab = React.forwardRef(({item, onItemPress, selected}, ref) => {
               </View>
             </View>
           }
-          <Image
+          <Animated.Image
               source={item.image}
-              style={{width: 20, height: 20, resizeMode: 'cover', tintColor: selected ? 'white': Theme.primary}}
+              style={{width: 20, height: 20, resizeMode: 'cover', tintColor: selcolor}}
             />
         </View>
-          <Animated.Text style={[config.language == 'en' ? styles.tabText : styles.tabText_rtl, {color: selected ? 'white': Theme.primary} ]}>
+          <Animated.Text style={[config.language == 'en' ? styles.tabText : styles.tabText_rtl, {color: selcolor} ]}>
             {item.title}
           </Animated.Text>
       </View>
@@ -91,8 +94,8 @@ const Indicator = ({measures, scrollX}) => {
         height: 36,
         width: indicatorWidth,
         left: -paddingHoz,
-        backgroundColor: '#e1fff3',
-        // backgroundColor: Theme.primary,
+        // backgroundColor: '#e1fff3',
+        backgroundColor: Theme.primary,
         transform: [{
           translateX
         }],
@@ -136,7 +139,7 @@ const Tabs = ({data, scrollX, onItemPress, pageNumber}) => {
         ref={containerRef}
         style={styles.tabsWrapper}>
         {data.map((item, index) => {
-          return <Tab key={item.key} item={item} ref={item.ref} onItemPress={() => onItemPress(index)} selected={pageNumber===index}/>
+          return <Tab key={item.key} item={item} ref={item.ref} onItemPress={() => onItemPress(index)} selected={pageNumber===index} scrollX={scrollX} index={index}/>
         })}
         {measures.length > 0 && <Indicator measures={measures} scrollX={scrollX}/>}
       </View>
